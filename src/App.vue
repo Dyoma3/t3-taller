@@ -1,60 +1,67 @@
 <template>
-  <v-app>
+  <v-app style="font-family: Itim">
     <v-app-bar
       app
-      color="primary"
+      style="background: linear-gradient(90deg, rgba(72,83,253,1) 0%, rgba(129,234,220,1) 100%)"
       dark
     >
       <div class="d-flex align-center">
-        <v-img
-          alt="Vuetify Logo"
-          class="shrink mr-2"
-          contain
-          src="https://cdn.vuetifyjs.com/images/logos/vuetify-logo-dark.png"
-          transition="scale-transition"
-          width="40"
-        />
 
-        <v-img
-          alt="Vuetify Name"
-          class="shrink mt-1 hidden-sm-and-down"
-          contain
-          min-width="100"
-          src="https://cdn.vuetifyjs.com/images/logos/vuetify-name-dark.png"
-          width="100"
-        />
+        <div class="ml-7" style="font-family: Satisfy;font-size:28px">
+          Bin-Laden Airlines
+        </div>
       </div>
 
       <v-spacer></v-spacer>
 
-      <v-btn
-        href="https://github.com/vuetifyjs/vuetify/releases/latest"
-        target="_blank"
-        text
-      >
-        <span class="mr-2">Latest Release</span>
-        <v-icon>mdi-open-in-new</v-icon>
-      </v-btn>
+      <div class="mr-7" style="font-size:20px;color:purple">
+        Our flights are the bomb!	&#128163;
+      </div>
     </v-app-bar>
 
     <v-main>
-      <HelloWorld/>
+      <v-container class="mt-2">
+      <div class="d-flex align-center flex-column">
+        <div id="mapContainer" class="map-container"/>
+      </div>
+      </v-container>
     </v-main>
   </v-app>
 </template>
 
 <script>
-import HelloWorld from './components/HelloWorld';
+import mapboxgl from 'mapbox-gl';
 
 export default {
   name: 'App',
 
-  components: {
-    HelloWorld,
-  },
-
   data: () => ({
-    //
+    map: null,
+    mapLoading: true,
   }),
+  mounted() {
+    mapboxgl.accessToken = process.env.VUE_APP_MAPBOX_ACCESS_TOKEN;
+    this.map = new mapboxgl.Map({
+      container: 'mapContainer',
+      style: 'mapbox://styles/mapbox/streets-v11',
+      zoom: -1,
+      center: [0, 0],
+    });
+    this.map.on('load', () => {
+      this.map.resize();
+      this.mapLoading = false;
+      this.map.fitBounds([
+        [180, 84],
+        [-180, -60]
+      ]);
+    });
+  },
 };
 </script>
+<style scoped>
+.map-container {
+  height: 500px;
+  width:750px;
+  overflow: hidden;
+}
+</style>
