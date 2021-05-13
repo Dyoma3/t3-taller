@@ -25,6 +25,9 @@
         <transition name="map">
           <div id="mapContainer" v-if="mapVisible" class="map-container"/>
         </transition>
+        <div style="top: 300px; position:fixed">
+          <v-progress-circular v-if="mapLoading" color="ternary" size="60" indeterminate/>
+        </div>
       </div>
       </v-container>
     </v-main>
@@ -33,14 +36,18 @@
 
 <script>
 import mapboxgl from 'mapbox-gl';
+import io from 'socket.io-client';
+import myImage from './assets/logo.png'
 
 export default {
   name: 'App',
 
   data: () => ({
     map: null,
+    socket: null,
     mapLoading: true,
     mapVisible: false,
+    flights: [],
   }),
   mounted() {
     this.mapVisible = true;
@@ -49,18 +56,133 @@ export default {
       this.map = new mapboxgl.Map({
         container: 'mapContainer',
         style: 'mapbox://styles/mapbox/streets-v11',
-        zoom: -1,
-        center: [0, 0],
+        bounds: [
+          [180, 84],
+          [-180, -60]
+        ],
       });
       this.map.on('load', () => {
         this.map.resize();
         this.mapLoading = false;
-        this.map.fitBounds([
-          [180, 84],
-          [-180, -60]
-        ]);
+        this.map.addSource('route', {
+          type: 'geojson',
+          data: {
+            type: 'Feature',
+            properties: {},
+            geometry: {
+              type: 'LineString',
+              coordinates: [
+                [-122.483696, 60.833818],
+                [-122.483482, 37.833174],
+              ],
+            },
+          },
+        });
+        this.map.addLayer({
+          id: 'route',
+          type: 'line',
+          source: 'route',
+          layout: {
+          'line-cap': 'round'
+          },
+          paint: {
+            'line-color': 'green',
+            'line-width': 3,
+          },
+        });
+        this.map.loadImage(
+myImage,
+(error, image) => {
+if (error) throw error;
+ 
+// Add the image to the map style.
+this.map.addImage('cat', image);
+ 
+// Add a data source containing one point feature.
+this.map.addSource('point', {
+'type': 'geojson',
+'data': {
+'type': 'FeatureCollection',
+'features': [
+{
+'type': 'Feature',
+'geometry': {
+'type': 'Point',
+'coordinates': [-77.4144, 25.0759]
+}
+}
+]
+}
+});
+ 
+// Add a layer to use the image to represent the data.
+this.map.addLayer({
+'id': 'points',
+'type': 'symbol',
+'source': 'point', // reference the data source
+'layout': {
+'icon-image': 'cat', // reference the image
+'icon-size': 0.1
+}
+});
+}
+);
+        /* this.map.loadImage('https://upload.wikimedia.org/wikipedia/commons/7/7c/201408_cat.png',
+        (error, image) => {
+          if (error) throw error;
+          if (!this.map.hasImage('cat')) this.map.addImage('cat', image);
+          this.map.addSource('start', {
+          type: 'geojson',
+          data: {
+            type: 'Feature',
+            properties: {},
+            geometry: {
+              type: 'Point',
+              coordinates: [
+                [-122.483696, 60.833818],
+              ],
+            },
+          },
+        });
+          this.map.addLayer({
+          id: 'starts',
+          type: 'symbol',
+          source: 'start',
+          layout: {
+          "icon-image": 'cat',
+          'icon-size': 0.25
+          },
+          paint: {
+          },
+        });
+        }); */
+        this.socket = io('wss://tarea-3-websocket.2021-1.tallerdeintegracion.cl', {
+          path: '/flights',
+        });
+        /* this.socket.on('FLIGHTS', this.getFlights);
+        // this.socket.on('POSITION', this.getPosition);
+        this.socket.on('CHAT', this.getMessage);
+        this.socket.emit('FLIGHTS', {}); */
       });
     }, 200);
+  },
+  methods: {
+    getPosition(message) {
+      console.log(message);
+    },
+    getFlights(message) {
+      this.flights = message;
+      //setup MAP
+      console.log(message);
+    },
+    getMessage(message) {
+      console.log(message);
+    },
+    insertRoute(flightInfo) {
+      console.log(flightInfo);
+      this.map.addSource();
+      this.map.addLayer();
+    }
   },
 };
 </script>
@@ -69,6 +191,9 @@ export default {
   height: 500px;
   width:750px;
   overflow: hidden;
+  border-style: solid;
+  border-radius: 5px;
+  border-color: #9e74d0;
 }
 .bounce-enter-active {
   animation: bounce 0.9s;
