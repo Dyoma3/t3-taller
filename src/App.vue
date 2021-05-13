@@ -48,9 +48,12 @@ export default {
     mapLoading: true,
     mapVisible: false,
     flights: [],
+    airplanes: {},
+    randomCoordinates: [-120, 40],
   }),
   mounted() {
     this.mapVisible = true;
+    // timeout is for loading the map before the animation
     setTimeout(() => {
       mapboxgl.accessToken = process.env.VUE_APP_MAPBOX_ACCESS_TOKEN;
       this.map = new mapboxgl.Map({
@@ -64,7 +67,72 @@ export default {
       this.map.on('load', () => {
         this.map.resize();
         this.mapLoading = false;
-        this.map.addSource('route', {
+        this.map.loadImage(myImage, (error, image) => {
+          if (error) return;
+          // Add the image to the map style.
+          this.map.addImage('cat', image);
+        });
+
+        this.socket = io('wss://tarea-3-websocket.2021-1.tallerdeintegracion.cl', {
+          path: '/flights',
+        });
+        this.socket.on('FLIGHTS', this.getFlights);
+        this.socket.on('POSITION', this.getPosition);
+        // this.socket.on('CHAT', this.getMessage);
+        this.socket.emit('FLIGHTS', {});
+      });
+
+// Add a data source containing one point feature.
+/* this.map.addSource('point', {
+'type': 'geojson',
+
+'data': {
+'type': 'FeatureCollection',
+'features': [
+{
+'type': 'Feature',
+'geometry': {
+'type': 'Point',
+'coordinates': [-122.483696, 60.833818]
+}
+},
+{
+'type': 'Feature',
+'geometry': {
+'type': 'Point',
+'coordinates': this.randomCoordinates,
+}
+},
+
+]
+}
+}); */
+ 
+// Add a layer to use the image to represent the data.
+/* this.map.addLayer({
+'id': 'points',
+'type': 'symbol',
+'source': 'point', // reference the data source
+'layout': {
+'icon-image': 'cat', // reference the image
+'icon-size': 0.1,
+}
+}); */
+
+    }, 200);
+  },
+  methods: {
+    getPosition(message) {
+      if (!this.airplanes[message.code]) return;
+      this.airplanes[message.code].setLngLat(
+        [message.position[1], message.position[0]]
+      );
+
+    },
+    getFlights(message) {
+      this.flights = message;
+      this.flights.forEach((flight) => {
+        this.map.addSource(`${flight.code}Route`, {
           type: 'geojson',
           data: {
             type: 'Feature',
@@ -72,16 +140,16 @@ export default {
             geometry: {
               type: 'LineString',
               coordinates: [
-                [-122.483696, 60.833818],
-                [-122.483482, 37.833174],
+                [flight.origin[1], flight.origin[0]],
+                [flight.destination[1], flight.destination[0]],
               ],
             },
           },
         });
         this.map.addLayer({
-          id: 'route',
+          id: `${flight.code}Route`,
           type: 'line',
-          source: 'route',
+          source: `${flight.code}Route`,
           layout: {
           'line-cap': 'round'
           },
@@ -90,99 +158,16 @@ export default {
             'line-width': 3,
           },
         });
-        this.map.loadImage(
-myImage,
-(error, image) => {
-if (error) throw error;
- 
-// Add the image to the map style.
-this.map.addImage('cat', image);
- 
-// Add a data source containing one point feature.
-this.map.addSource('point', {
-'type': 'geojson',
-'data': {
-'type': 'FeatureCollection',
-'features': [
-{
-'type': 'Feature',
-'geometry': {
-'type': 'Point',
-'coordinates': [-77.4144, 25.0759]
-}
-}
-]
-}
-});
- 
-// Add a layer to use the image to represent the data.
-this.map.addLayer({
-'id': 'points',
-'type': 'symbol',
-'source': 'point', // reference the data source
-'layout': {
-'icon-image': 'cat', // reference the image
-'icon-size': 0.1
-}
-});
-}
-);
-        /* this.map.loadImage('https://upload.wikimedia.org/wikipedia/commons/7/7c/201408_cat.png',
-        (error, image) => {
-          if (error) throw error;
-          if (!this.map.hasImage('cat')) this.map.addImage('cat', image);
-          this.map.addSource('start', {
-          type: 'geojson',
-          data: {
-            type: 'Feature',
-            properties: {},
-            geometry: {
-              type: 'Point',
-              coordinates: [
-                [-122.483696, 60.833818],
-              ],
-            },
-          },
-        });
-          this.map.addLayer({
-          id: 'starts',
-          type: 'symbol',
-          source: 'start',
-          layout: {
-          "icon-image": 'cat',
-          'icon-size': 0.25
-          },
-          paint: {
-          },
-        });
-        }); */
-        this.socket = io('wss://tarea-3-websocket.2021-1.tallerdeintegracion.cl', {
-          path: '/flights',
-        });
-        /* this.socket.on('FLIGHTS', this.getFlights);
-        // this.socket.on('POSITION', this.getPosition);
-        this.socket.on('CHAT', this.getMessage);
-        this.socket.emit('FLIGHTS', {}); */
+        // Add airplane marker
+        this.airplanes[flight.code] = new mapboxgl.Marker();
+        this.airplanes[flight.code]
+          .setLngLat([0, -80])
+          .addTo(this.map);
       });
-    }, 200);
-  },
-  methods: {
-    getPosition(message) {
-      console.log(message);
-    },
-    getFlights(message) {
-      this.flights = message;
-      //setup MAP
-      console.log(message);
     },
     getMessage(message) {
       console.log(message);
     },
-    insertRoute(flightInfo) {
-      console.log(flightInfo);
-      this.map.addSource();
-      this.map.addLayer();
-    }
   },
 };
 </script>
@@ -194,6 +179,7 @@ this.map.addLayer({
   border-style: solid;
   border-radius: 5px;
   border-color: #9e74d0;
+  position: relative;
 }
 .bounce-enter-active {
   animation: bounce 0.9s;
