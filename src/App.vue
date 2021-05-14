@@ -8,7 +8,7 @@
       <div class="d-flex align-center">
 
         <div class="ml-7" style="font-family: Satisfy;font-size:28px">
-          Bin-Laden Airlines
+          Bin-Laden Airlines Control Center
         </div>
       </div>
 
@@ -65,6 +65,7 @@ export default {
         ],
       });
       this.map.on('load', () => {
+        this.map.addControl(new mapboxgl.FullscreenControl());
         this.map.resize();
         this.mapLoading = false;
         this.map.loadImage(myImage, (error, image) => {
@@ -81,45 +82,7 @@ export default {
         // this.socket.on('CHAT', this.getMessage);
         this.socket.emit('FLIGHTS', {});
       });
-
-// Add a data source containing one point feature.
-/* this.map.addSource('point', {
-'type': 'geojson',
-
-'data': {
-'type': 'FeatureCollection',
-'features': [
-{
-'type': 'Feature',
-'geometry': {
-'type': 'Point',
-'coordinates': [-122.483696, 60.833818]
-}
-},
-{
-'type': 'Feature',
-'geometry': {
-'type': 'Point',
-'coordinates': this.randomCoordinates,
-}
-},
-
-]
-}
-}); */
- 
-// Add a layer to use the image to represent the data.
-/* this.map.addLayer({
-'id': 'points',
-'type': 'symbol',
-'source': 'point', // reference the data source
-'layout': {
-'icon-image': 'cat', // reference the image
-'icon-size': 0.1,
-}
-}); */
-
-    }, 200);
+    }, 50);
   },
   methods: {
     getPosition(message) {
@@ -159,8 +122,25 @@ export default {
           },
         });
         // Add airplane marker
-        this.airplanes[flight.code] = new mapboxgl.Marker();
-        this.airplanes[flight.code]
+        const el = document.createElement('div');
+        el.className = 'marker';
+        const angleRadian = Math.atan(
+          (flight.destination[0] - flight.origin[0])
+          / (flight.destination[1] - flight.origin[1])
+        );
+        let angleDegrees = (angleRadian / Math.PI) * 180;
+        if (
+          angleDegrees >= 0
+          && (flight.destination[0] - flight.origin[0]) < 0
+        ) {
+          angleDegrees += 180;
+        } else if (
+          angleDegrees < 0
+          && (flight.destination[0] - flight.origin[0] > 0)
+        ) {
+          angleDegrees += 180;
+        }
+        this.airplanes[flight.code] = new mapboxgl.Marker({ element: el, rotation: -angleDegrees + 90 })
           .setLngLat([0, -80])
           .addTo(this.map);
       });
@@ -171,7 +151,7 @@ export default {
   },
 };
 </script>
-<style scoped>
+<style>
 .map-container {
   height: 500px;
   width:750px;
@@ -180,6 +160,13 @@ export default {
   border-radius: 5px;
   border-color: #9e74d0;
   position: relative;
+}
+.marker {
+  background-image: url('assets/plane.png');
+  background-size: 100%;
+  width: 30px;
+  height: 30px;
+  cursor: pointer;
 }
 .bounce-enter-active {
   animation: bounce 0.9s;
