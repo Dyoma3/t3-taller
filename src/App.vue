@@ -29,14 +29,14 @@
           <v-progress-circular v-if="mapLoading" color="ternary" size="60" indeterminate/>
         </div>
         <v-speed-dial
-          style="position:fixed;right:80px;bottom:80px"
+          style="position:fixed;right:80px;bottom:60px"
           v-model="chat"
           transition="slide-y-reverse-transition"
         >
           <template v-slot:activator>
             <v-btn
               v-if="showingChat"
-              color="purple"
+              color="#6c4a94"
               style="color:white; animation: bounceInLeft; animation-duration: 1s;
               height:50px;width:130px;font-size:22px;text-transform: none"
               rounded
@@ -52,6 +52,26 @@
           </div>
 
         </v-speed-dial>
+        <v-carousel
+          v-if="showingFlights"
+          class="mt-8" height="140" style="width:750px;border-radius: 5px;
+          animation: flipInX; animation-duration:1s"
+          hide-delimiter-background
+        >
+          <v-carousel-item>
+            <v-row
+              class="align-center justify-space-between px-16"
+              style="height:140px;background-color:#9e74d0"
+            >
+              <div v-for="(n, i) in [1, 2, 3]" :key="i"
+                style="height:100px;width:150px;background-color:#6c4a94;
+                border-radius: 20px"
+              >
+
+              </div>
+            </v-row>
+          </v-carousel-item>
+        </v-carousel>
       </div>
       </v-container>
     </v-main>
@@ -77,6 +97,7 @@ export default {
     randomCoordinates: [-120, 40],
     chat: false,
     showingChat: false,
+    showingFlights: false,
   }),
   mounted() {
     this.mapVisible = true;
@@ -113,6 +134,9 @@ export default {
     setTimeout(() => {
       this.showingChat = true;
     }, 1800);
+    setTimeout(() => {
+      this.showingFlights = true;
+    }, 3000);
   },
   methods: {
     getPosition(message) {
