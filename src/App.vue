@@ -28,6 +28,30 @@
         <div style="top: 300px; position:fixed">
           <v-progress-circular v-if="mapLoading" color="ternary" size="60" indeterminate/>
         </div>
+        <v-speed-dial
+          style="position:fixed;right:80px;bottom:80px"
+          v-model="chat"
+          transition="slide-y-reverse-transition"
+        >
+          <template v-slot:activator>
+            <v-btn
+              v-if="showingChat"
+              color="purple"
+              style="color:white; animation: bounceInLeft; animation-duration: 1s;
+              height:50px;width:130px;font-size:22px;text-transform: none"
+              rounded
+            >
+              <v-icon class="mr-2">
+                mdi-chat
+              </v-icon>
+              Chat
+            </v-btn>
+          </template>
+          <div style="width:50px;height:100px;background-color:black">
+
+          </div>
+
+        </v-speed-dial>
       </div>
       </v-container>
     </v-main>
@@ -38,6 +62,7 @@
 import mapboxgl from 'mapbox-gl';
 import io from 'socket.io-client';
 import myImage from './assets/logo.png'
+import 'animate.css';
 
 export default {
   name: 'App',
@@ -50,6 +75,8 @@ export default {
     flights: [],
     airplanes: {},
     randomCoordinates: [-120, 40],
+    chat: false,
+    showingChat: false,
   }),
   mounted() {
     this.mapVisible = true;
@@ -83,6 +110,9 @@ export default {
         this.socket.emit('FLIGHTS', {});
       });
     }, 50);
+    setTimeout(() => {
+      this.showingChat = true;
+    }, 1800);
   },
   methods: {
     getPosition(message) {
@@ -168,25 +198,13 @@ export default {
   height: 30px;
   cursor: pointer;
 }
-.bounce-enter-active {
-  animation: bounce 0.9s;
-}
-.bounce-leave-active {
-  animation: bounce 0.3s reverse;
-}
-@keyframes bounce {
-  0% {
-    transform: scale(0);
-  }
-  50% {
-    transform: scale(1.2);
-  }
-  100% {
-    transform: scale(1);
-  }
-}
+
 .map-enter-active {
-  transition: all 0.4s ease 1.2s;
+  animation: bounceInDown 1s;
+  animation-delay: 1s;
+  transition: all 0.3s;
+  transition-delay: 1s;
+  /* transition: all 0.4s ease 1.2s; */
 }
 .map-leave-active {
   transition: all 0.3s;
