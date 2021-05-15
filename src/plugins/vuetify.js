@@ -11,6 +11,7 @@ export default new Vuetify({
                 primary: '#4853fd',
                 secondary: '#81eadc',
                 ternary: '#9e74d0',
+                quaternary: '#6c4a94',
             }
         }
     }

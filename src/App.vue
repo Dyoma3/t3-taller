@@ -8,7 +8,7 @@
       <div class="d-flex align-center">
 
         <div class="ml-7" style="font-family: Satisfy;font-size:28px">
-          Bin-Laden Airlines Control Center
+          Bin-Laden Control Center
         </div>
       </div>
 
@@ -52,26 +52,61 @@
           </div>
 
         </v-speed-dial>
-        <v-carousel
+        <div
           v-if="showingFlights"
-          class="mt-8" height="140" style="width:750px;border-radius: 5px;
-          animation: flipInX; animation-duration:1s"
-          hide-delimiter-background
+          class="mt-5"
+          style="width:750px; animation: flipInX; animation-duration:1s"
         >
-          <v-carousel-item>
-            <v-row
-              class="align-center justify-space-between px-16"
-              style="height:140px;background-color:#9e74d0"
-            >
-              <div v-for="(n, i) in [1, 2, 3]" :key="i"
-                style="height:100px;width:150px;background-color:#6c4a94;
-                border-radius: 20px"
+          <div
+            class="d-flex justify-center align-center"
+            style="width: 100%; height: 20px; background-color: #6c4a94; color:white;
+            overflow:hidden;border-radius: 5px 5px 0px 0px"
+          >
+            Vuelos
+          </div>
+          <v-carousel
+            height="140"
+            hide-delimiter-background
+            style="background-color: #9e74d0"
+          >
+            <v-carousel-item v-for="(carouselNumber, i) in carouselNumberArray" :key="i">
+              <v-row
+                class="align-center justify-space-between px-16 mt-0"
+                style="height:140px;"
               >
-
-              </div>
-            </v-row>
-          </v-carousel-item>
-        </v-carousel>
+                <div v-for="(n, j) in [0, 1, 2]" :key="j" style="height:100px">
+                  <v-hover v-slot="{ hover }">
+                  <div
+                    v-if="flights.length > (carouselNumber * 3 + n)"
+                    class="d-flex align-center justify-center flex-column"
+                    style="height:100px;width:150px;background-color:#6c4a94;
+                    border-radius: 20px; position:relative"
+                  >
+                    <div class="card-text">
+                      #{{ flights[carouselNumber * 3 + n].code }}
+                    </div>
+                    <div class="card-text">
+                      origen: {{ flights[carouselNumber * 3 + n].code }}
+                    </div>
+                    <div class="card-text">
+                      destino: {{ flights[carouselNumber * 3 + n].code }}
+                    </div>
+                    <div
+                      v-if="hover"
+                      class="d-flex align-center justify-center"
+                      style="position: absolute; height:100%; width:100%;
+                      background-color: rgba(255, 255, 255, 0.7); border-radius:20px;
+                      color: #6c4a94; font-size: 20px; font-weight: 600"
+                    >
+                      Ver más
+                    </div>
+                  </div>
+                  </v-hover>
+                </div>
+              </v-row>
+            </v-carousel-item>
+          </v-carousel>
+        </div>
       </div>
       </v-container>
     </v-main>
@@ -99,6 +134,19 @@ export default {
     showingChat: false,
     showingFlights: false,
   }),
+  computed: {
+    carouselNumberArray() {
+      let number = parseInt(this.flights.length / 3, 10);
+      if (this.flights.length % 3 > 0) {
+        number += 1;
+      }
+      const numbersArray = [];
+      for (let i = 0; i < number; i ++) {
+        numbersArray.push(i);
+      }
+      return numbersArray;
+    }
+  },
   mounted() {
     this.mapVisible = true;
     // timeout is for loading the map before the animation
@@ -136,7 +184,7 @@ export default {
     }, 1800);
     setTimeout(() => {
       this.showingFlights = true;
-    }, 3000);
+    }, 2700);
   },
   methods: {
     getPosition(message) {
@@ -222,7 +270,10 @@ export default {
   height: 30px;
   cursor: pointer;
 }
-
+.card-text {
+  color: white;
+  font-size: 17px;
+}
 .map-enter-active {
   animation: bounceInDown 1s;
   animation-delay: 1s;
