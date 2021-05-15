@@ -47,6 +47,29 @@
         <div v-if="chat && confirmedNickName"
         class="chat" style="position: fixed; bottom: 120px; right: 15px;
         z-index: 2">
+          <v-text-field
+            class="mr-0"
+            style="border-radius: 4px 0px 0px 4px;margin-bottom:-25px"
+            outlined
+            dense
+            v-model="message"
+            label="Nickname"
+          />
+          <v-btn
+            class="ma-0"
+            @click="sendMessage"
+            style="
+              border-radius: 0px 4px 4px 0px;
+              color: white;
+              box-shadow: none;
+              width: 77px;
+            "
+            color="#9e74d0"
+            height="40"
+            :disabled="message === ''"
+          >
+            Send
+          </v-btn>
 
         </div>
         <div v-if="chat && !confirmedNickName"
@@ -76,55 +99,6 @@
               Confirm
             </v-btn>
         </div>
-        <!-- <v-speed-dial
-          style="position:fixed;right:120px;bottom:60px;"
-          v-model="chat"
-          transition="slide-y-reverse-transition"
-        >
-          <template v-slot:activator>
-            <v-btn
-              v-if="showingChat"
-              color="#6c4a94"
-              style="color:white; animation: bounceInLeft; animation-duration: 1s;
-              height:50px;width:130px;font-size:22px;text-transform: none;
-              position: fixed: bottom: 60px; right: 0px"
-              rounded
-            >
-              <v-icon class="mr-2">
-                mdi-chat
-              </v-icon>
-              Chat
-            </v-btn>
-          </template>
-          <div v-if="confirmedNickName" class="chat">
-
-          </div>
-          <div v-else class="chat d-flex align-center px-3" style="height: 100px">
-            <v-text-field
-              class="mb-n6 mr-0"
-              style="border-radius: 4px 0px 0px 4px"
-              outlined
-              dense
-              v-model="nickName"
-              label="Nickname"
-            />
-            <v-btn
-              class="ma-0"
-              @click="confirmedNickName = true"
-              style="
-                border-radius: 0px 4px 4px 0px;
-                color: white;
-                box-shadow: none;
-                width: 77px
-              "
-              color="#81eadc"
-              height="40"
-            >
-              Confirm
-            </v-btn>
-          </div>
-
-        </v-speed-dial> -->
 
         <!-- Flights Carousel -->
         <div
@@ -265,6 +239,8 @@ export default {
     dialogCode: null,
     nickName: '',
     confirmedNickName: false,
+    message: '',
+    messages: [],
   }),
   computed: {
     carouselNumberArray() {
@@ -316,7 +292,7 @@ export default {
         });
         this.socket.on('FLIGHTS', this.getFlights);
         this.socket.on('POSITION', this.getPosition);
-        // this.socket.on('CHAT', this.getMessage);
+        this.socket.on('CHAT', this.getMessage);
         this.socket.emit('FLIGHTS', {});
       });
     }, 50);
@@ -392,13 +368,17 @@ export default {
     getMessage(message) {
       console.log(message);
     },
-    sendMessage(message) {
-      console.log(message);
-    },
     openFlight(code) {
       this.dialogCode = code;
       this.dialogVisible = true;
-    }
+    },
+    sendMessage() {
+      this.socket.emit('CHAT', {
+        name: this.nickName,
+        message: this.message,
+      });
+      this.message = '';
+    },
   },
 };
 </script>
