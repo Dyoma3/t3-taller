@@ -71,36 +71,33 @@
           >
             <v-carousel-item v-for="(carouselNumber, i) in carouselNumberArray" :key="i">
               <v-row
-                class="align-center justify-space-between px-16 mt-0"
-                style="height:140px;"
+                class="align-center justify-space-between mt-0"
+                style="height:140px;padding-right: 85px; padding-left:85px"
               >
                 <div v-for="(n, j) in [0, 1, 2]" :key="j" style="height:100px">
-                  <v-hover v-slot="{ hover }">
-                  <div
+                  <v-hover
                     v-if="flights.length > (carouselNumber * 3 + n)"
-                    class="d-flex align-center justify-center flex-column"
-                    style="height:100px;width:150px;background-color:#6c4a94;
-                    border-radius: 20px; position:relative"
+                    v-slot="{ hover }"
                   >
-                    <div class="card-text">
-                      #{{ flights[carouselNumber * 3 + n].code }}
-                    </div>
-                    <div class="card-text">
-                      origen: {{ flights[carouselNumber * 3 + n].code }}
-                    </div>
-                    <div class="card-text">
-                      destino: {{ flights[carouselNumber * 3 + n].code }}
-                    </div>
                     <div
-                      v-if="hover"
-                      class="d-flex align-center justify-center"
-                      style="position: absolute; height:100%; width:100%;
-                      background-color: rgba(255, 255, 255, 0.7); border-radius:20px;
-                      color: #6c4a94; font-size: 20px; font-weight: 600"
+                      class="d-flex align-center justify-center flex-column"
+                      style="height:100px;width:180px;background-color:#6c4a94;
+                      border-radius: 20px; position:relative"
                     >
-                      Ver más
+                      <div class="card-text">
+                        Flight #{{ flights[carouselNumber * 3 + n].code }}
+                      </div>
+                      <div class="card-text">
+                        {{ flights[carouselNumber * 3 + n].airline }}
+                      </div>
+                      <div
+                        v-if="hover"
+                        class="d-flex align-center justify-center card-hover"
+                        @click="openFlight(flights[carouselNumber * 3 + n].code)"
+                      >
+                        Ver más
+                      </div>
                     </div>
-                  </div>
                   </v-hover>
                 </div>
               </v-row>
@@ -109,6 +106,61 @@
         </div>
       </div>
       </v-container>
+
+      <!-- Flight Dialog -->
+      <v-dialog
+        :fullscreen="$vuetify.breakpoint.smAndDown"
+        transition="dialog-bottom-transition"
+        v-model="dialogVisible"
+        width="540"
+        style="background-color:#9e74d0"
+      >
+          <div
+            v-if="dialogCode"
+            class="d-flex align-center flex-column pt-3"
+            style="background-color:#6c4a94; width: 540px;"
+          >
+            <div
+              class="d-flex align-center justify-center"
+              style="height: 40px; background-color: #6c4a94; font-size: 20px;
+              color: white; width:100%"
+            >
+              #{{ dialogCode }}
+            </div>
+            <div class="dialog-text">
+              Airline: {{ dialogFlight.airline }}
+            </div>
+            <div class="dialog-text">
+              Plane: {{ dialogFlight.plane }}
+            </div>
+            <div class="dialog-text">
+              Number of Seats: {{ dialogFlight.seats }}
+            </div>
+            <div class="dialog-text">
+              Origin {{ dialogFlight.origin[0] }}Lat
+              , {{dialogFlight.origin[1]}}Lon
+            </div>
+            <div class="dialog-text">
+              Destination {{ dialogFlight.destination[0] }}Lat
+              , {{dialogFlight.destination[1]}}Lon
+            </div>
+            <v-row class="mx-0 mb-5 mt-3 dialog-text">
+              <v-col
+                class="ma-0 pa-0 d-flex justify-center"
+                style="font-size: 22px"
+                cols="12">
+                Passengers
+              </v-col>
+              <v-col
+                class="mb-2 pa-0 d-flex justify-center col-6"
+                v-for="(passenger, i) in dialogFlight.passengers"
+                :key="i"
+              >
+                {{ passenger.name }}, {{ passenger.age }}
+              </v-col>
+            </v-row>
+          </div>
+      </v-dialog>
     </v-main>
   </v-app>
 </template>
@@ -133,6 +185,8 @@ export default {
     chat: false,
     showingChat: false,
     showingFlights: false,
+    dialogVisible: false,
+    dialogCode: null,
   }),
   computed: {
     carouselNumberArray() {
@@ -145,7 +199,16 @@ export default {
         numbersArray.push(i);
       }
       return numbersArray;
-    }
+    },
+    dialogFlight() {
+      let selectedFlight = null;
+      this.flights.forEach((flight) => {
+        if (flight.code === this.dialogCode) {
+          selectedFlight = flight;
+        }
+      });
+      return selectedFlight;
+    },
   },
   mounted() {
     this.mapVisible = true;
@@ -196,7 +259,8 @@ export default {
     },
     getFlights(message) {
       this.flights = message;
-      this.flights.forEach((flight) => {
+      message.forEach((flight) => {
+        this
         this.map.addSource(`${flight.code}Route`, {
           type: 'geojson',
           data: {
@@ -250,6 +314,13 @@ export default {
     getMessage(message) {
       console.log(message);
     },
+    sendMessage(message) {
+      console.log(message);
+    },
+    openFlight(code) {
+      this.dialogCode = code;
+      this.dialogVisible = true;
+    }
   },
 };
 </script>
@@ -273,6 +344,22 @@ export default {
 .card-text {
   color: white;
   font-size: 17px;
+}
+.card-hover {
+  position: absolute;
+  height:100%;
+  width:100%;
+  background-color:rgba(255, 255, 255, 0.7);
+  border-radius:20px;
+  color: #6c4a94;
+  font-size: 20px;
+  font-weight: 600;
+  cursor: pointer;
+}
+.dialog-text {
+  margin-top: 5px;
+  color: white;
+  font-size: 20px;
 }
 .map-enter-active {
   animation: bounceInDown 1s;
