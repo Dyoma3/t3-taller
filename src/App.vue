@@ -33,9 +33,9 @@
         <v-btn
           v-if="showingChat"
           color="#6c4a94"
-          style="color:white; animation: bounceInLeft; animation-duration: 1s;
-          height:50px;width:130px;font-size:22px;text-transform: none;
-          position: fixed; bottom: 60px; right: 100px"
+          style="color:white; animation: bounceInLeft;animation-duration: 1s;
+          height:50px; width:130px; font-size:22px; text-transform: none;
+          position: fixed; bottom: 30px; right: 50px;"
           rounded
           @click="chat = !chat"
         >
@@ -44,38 +44,50 @@
           </v-icon>
           {{ chat ? 'Close' : 'Chat' }}
         </v-btn>
-        <div v-if="chat && confirmedNickName"
-        class="chat" style="position: fixed; bottom: 120px; right: 15px;
-        z-index: 2">
-          <v-text-field
-            class="mr-0"
-            style="border-radius: 4px 0px 0px 4px;margin-bottom:-25px"
-            outlined
-            dense
-            v-model="message"
-            label="Nickname"
-          />
-          <v-btn
-            class="ma-0"
-            @click="sendMessage"
-            style="
-              border-radius: 0px 4px 4px 0px;
-              color: white;
-              box-shadow: none;
-              width: 77px;
-            "
-            color="#9e74d0"
-            height="40"
-            :disabled="message === ''"
+        <transition name="chat">
+          <div
+            id="chatWindow"
+            v-if="chat && confirmedNickName"
+            class="chat"
+            style="bottom: 90px; right: 15px;"
           >
-            Send
-          </v-btn>
-
-        </div>
-        <div v-if="chat && !confirmedNickName"
-        class="chat d-flex align-center" style="position: fixed; bottom: 120px; right: 15px;
-        z-index: 2;height: 80px; padding-left: 20px; padding-right: 20px">
-          <v-text-field
+            <div
+              class="d-flex"
+              style="width: 100%; position: absolute; bottom:10px;
+              padding-right: 20px; padding-left: 20px"
+            >
+              <v-text-field
+                class="mr-0"
+                style="border-radius: 4px 0px 0px 4px; margin-bottom:-25px"
+                outlined
+                dense
+                v-model="message"
+                label="Message"
+              />
+              <v-btn
+                class="ma-0"
+                style="border-radius: 0px 4px 4px 0px;
+                color: white; box-shadow: none; width: 76px;"
+                @click="sendMessage"
+                color="#9e74d0"
+                height="40"
+                :disabled="message === ''"
+              >
+                Send
+              </v-btn>
+            </div>
+          </div>
+        </transition>
+        
+        <transition name="chat">
+          <div
+            id="confirmNickNameWindow"
+            v-if="chat && !confirmedNickName"
+            class="chat d-flex align-center"
+            style="bottom: 90px; right: 15px; height: 80px;
+            padding-left: 20px; padding-right: 20px"
+          >
+            <v-text-field
               class="mr-0"
               style="border-radius: 4px 0px 0px 4px;margin-bottom:-25px"
               outlined
@@ -85,20 +97,17 @@
             />
             <v-btn
               class="ma-0"
+              style="border-radius: 0px 4px 4px 0px;
+              color: white; box-shadow: none; width: 76px;"
               @click="confirmedNickName = true"
-              style="
-                border-radius: 0px 4px 4px 0px;
-                color: white;
-                box-shadow: none;
-                width: 77px;
-              "
               color="#9e74d0"
               height="40"
               :disabled="nickName === ''"
             >
               Confirm
             </v-btn>
-        </div>
+          </div>
+        </transition>
 
         <!-- Flights Carousel -->
         <div
@@ -155,7 +164,6 @@
         </div>
       </div>
       </v-container>
-
 
       <!-- Flight Dialog -->
       <v-dialog
@@ -382,6 +390,7 @@ export default {
   },
 };
 </script>
+
 <style>
 .map-container {
   height: 500px;
@@ -426,7 +435,15 @@ export default {
   border-radius: 10px;
   border-color: #9e74d0;
   border-width: 1px;
-  background-color: #efeef1
+  background-color: #efeef1;
+  position: fixed;
+  z-index: 2;
+}
+.chat-enter-active {
+  animation: zoomIn 0.3s;
+}
+.chat-leave-active {
+  animation: zoomOut 0.3s;
 }
 .map-enter-active {
   animation: bounceInDown 1s;
