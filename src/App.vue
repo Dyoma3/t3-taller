@@ -28,8 +28,56 @@
         <div style="top: 300px; position:fixed">
           <v-progress-circular v-if="mapLoading" color="ternary" size="60" indeterminate/>
         </div>
-        <v-speed-dial
-          style="position:fixed;right:80px;bottom:60px"
+
+        <!-- Chat -->
+        <v-btn
+          v-if="showingChat"
+          color="#6c4a94"
+          style="color:white; animation: bounceInLeft; animation-duration: 1s;
+          height:50px;width:130px;font-size:22px;text-transform: none;
+          position: fixed; bottom: 60px; right: 100px"
+          rounded
+          @click="chat = !chat"
+        >
+          <v-icon class="mr-2">
+            {{ chat ? 'mdi-close' : 'mdi-chat'}}
+          </v-icon>
+          {{ chat ? 'Close' : 'Chat' }}
+        </v-btn>
+        <div v-if="chat && confirmedNickName"
+        class="chat" style="position: fixed; bottom: 120px; right: 15px;
+        z-index: 2">
+
+        </div>
+        <div v-if="chat && !confirmedNickName"
+        class="chat d-flex align-center" style="position: fixed; bottom: 120px; right: 15px;
+        z-index: 2;height: 80px; padding-left: 20px; padding-right: 20px">
+          <v-text-field
+              class="mr-0"
+              style="border-radius: 4px 0px 0px 4px;margin-bottom:-25px"
+              outlined
+              dense
+              v-model="nickName"
+              label="Nickname"
+            />
+            <v-btn
+              class="ma-0"
+              @click="confirmedNickName = true"
+              style="
+                border-radius: 0px 4px 4px 0px;
+                color: white;
+                box-shadow: none;
+                width: 77px;
+              "
+              color="#9e74d0"
+              height="40"
+              :disabled="nickName === ''"
+            >
+              Confirm
+            </v-btn>
+        </div>
+        <!-- <v-speed-dial
+          style="position:fixed;right:120px;bottom:60px;"
           v-model="chat"
           transition="slide-y-reverse-transition"
         >
@@ -38,7 +86,8 @@
               v-if="showingChat"
               color="#6c4a94"
               style="color:white; animation: bounceInLeft; animation-duration: 1s;
-              height:50px;width:130px;font-size:22px;text-transform: none"
+              height:50px;width:130px;font-size:22px;text-transform: none;
+              position: fixed: bottom: 60px; right: 0px"
               rounded
             >
               <v-icon class="mr-2">
@@ -47,11 +96,37 @@
               Chat
             </v-btn>
           </template>
-          <div style="width:50px;height:100px;background-color:black">
+          <div v-if="confirmedNickName" class="chat">
 
           </div>
+          <div v-else class="chat d-flex align-center px-3" style="height: 100px">
+            <v-text-field
+              class="mb-n6 mr-0"
+              style="border-radius: 4px 0px 0px 4px"
+              outlined
+              dense
+              v-model="nickName"
+              label="Nickname"
+            />
+            <v-btn
+              class="ma-0"
+              @click="confirmedNickName = true"
+              style="
+                border-radius: 0px 4px 4px 0px;
+                color: white;
+                box-shadow: none;
+                width: 77px
+              "
+              color="#81eadc"
+              height="40"
+            >
+              Confirm
+            </v-btn>
+          </div>
 
-        </v-speed-dial>
+        </v-speed-dial> -->
+
+        <!-- Flights Carousel -->
         <div
           v-if="showingFlights"
           class="mt-5"
@@ -106,6 +181,7 @@
         </div>
       </div>
       </v-container>
+
 
       <!-- Flight Dialog -->
       <v-dialog
@@ -187,6 +263,8 @@ export default {
     showingFlights: false,
     dialogVisible: false,
     dialogCode: null,
+    nickName: '',
+    confirmedNickName: false,
   }),
   computed: {
     carouselNumberArray() {
@@ -360,6 +438,15 @@ export default {
   margin-top: 5px;
   color: white;
   font-size: 20px;
+}
+.chat {
+  width:300px;
+  height:400px;
+  border-style: solid;
+  border-radius: 10px;
+  border-color: #9e74d0;
+  border-width: 1px;
+  background-color: #efeef1
 }
 .map-enter-active {
   animation: bounceInDown 1s;
