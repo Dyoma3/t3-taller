@@ -326,15 +326,24 @@ export default {
   },
   watch: {
     confirmedNickName(value) {
-      setTimeout(() => {
-        if (value !== '') {
+      if (value !== '') {
+        setTimeout(() => {
+          const element = document.getElementById('chatWindow');
+            element.scrollTo({
+            top: element.scrollHeight, 
+          });
+        }, 100);
+      }
+    },
+    chat(value) {
+      if (value) {
+        setTimeout(() => {
           const element = document.getElementById('chatWindow');
             element.scrollTo({
             top: element.scrollHeight,
-            behavior: 'smooth',   
           });
-        }
-      }, 100);
+        }, 100);
+      }
     }
   },
   mounted() {
@@ -435,7 +444,20 @@ export default {
         }
         this.airplanes[flight.code] = new mapboxgl.Marker({ element: el, rotation: -angleDegrees + 90 })
           .setLngLat([0, -80])
+          .setPopup(new mapboxgl.Popup({ closeButton: false })
+          .setHTML(`<h3>#${flight.code}</h3>`)
+          .setMaxWidth("300px"))
           .addTo(this.map);
+        el.addEventListener('mouseover', () => {
+          this.airplanes[flight.code].togglePopup();
+        });
+        el.addEventListener('mouseout', () => {
+          this.airplanes[flight.code].togglePopup();
+        });
+        el.addEventListener('click', (event) => {
+          console.log(event);
+          event.preventDefault();
+        })
       });
     },
     getMessage(message) {
