@@ -46,35 +46,67 @@
         </v-btn>
         <transition name="chat">
           <div
-            id="chatWindow"
             v-if="chat && confirmedNickName"
             class="chat"
-            style="bottom: 90px; right: 15px;"
+            style="bottom: 90px; right: 15px; padding-top: 6px"
           >
+            <div id="chatWindow" style="height: 85%;overflow-y: scroll; position: relative;
+            padding-right: 5px;padding-left: 5px">
+              <div v-for="(message, i) in messages" :key="i"
+                :class="['my-3', 'd-flex', 'flex-column',
+                message.name === nickName ? 'align-end' : 'align-start']"
+                
+              >
+                <div
+                  class="pa-2"
+                  :style="{maxWidth: '80%', backgroundColor: message.name === nickName
+                  ? '#4853fd' : 'grey', borderRadius: '10px', color: 'white',
+                  wordWrap: 'break-word', position: 'realative'}"
+                >
+                  <div
+                    :class="['d-flex', message.name === nickName
+                    ? 'justify-end': 'justify-start']"
+                    :style="{fontSize: '19px', width: '100%', color: '#e4e4e4'}">
+                    {{ message.name }}
+                  </div>
+
+                  {{ message.message }}
+                  <div
+                    :class="['d-flex', message.name === nickName
+                    ? 'justify-end': 'justify-start']"
+                    :style="{fontSize: '13px', width: '100%', color: '#e4e4e4'}"
+                  >
+                    {{ message.date | dateFilter }}
+                  </div>
+                </div>
+              </div>
+            </div>
             <div
-              class="d-flex"
-              style="width: 100%; position: absolute; bottom:10px;
+              class="d-flex align-center"
+              style="width: 100%; height: 15%;
               padding-right: 20px; padding-left: 20px"
             >
-              <v-text-field
-                class="mr-0"
-                style="border-radius: 4px 0px 0px 4px; margin-bottom:-25px"
-                outlined
-                dense
-                v-model="message"
-                label="Message"
-              />
-              <v-btn
-                class="ma-0"
-                style="border-radius: 0px 4px 4px 0px;
-                color: white; box-shadow: none; width: 76px;"
-                @click="sendMessage"
-                color="#9e74d0"
-                height="40"
-                :disabled="message === ''"
-              >
-                Send
-              </v-btn>
+              <v-form class="d-flex" @submit.prevent="sendMessage">
+                <v-text-field
+                  class="mr-0"
+                  style="border-radius: 4px 0px 0px 4px; margin-bottom:-25px"
+                  outlined
+                  dense
+                  v-model="message"
+                  label="Message"
+                />
+                <v-btn
+                  class="ma-0"
+                  style="border-radius: 0px 4px 4px 0px;
+                  color: white; box-shadow: none; width: 76px;"
+                  @click="sendMessage"
+                  color="#9e74d0"
+                  height="40"
+                  :disabled="message === ''"
+                >
+                  Send
+                </v-btn>
+              </v-form>
             </div>
           </div>
         </transition>
@@ -87,25 +119,27 @@
             style="bottom: 90px; right: 15px; height: 80px;
             padding-left: 20px; padding-right: 20px"
           >
-            <v-text-field
-              class="mr-0"
-              style="border-radius: 4px 0px 0px 4px;margin-bottom:-25px"
-              outlined
-              dense
-              v-model="nickName"
-              label="Nickname"
-            />
-            <v-btn
-              class="ma-0"
-              style="border-radius: 0px 4px 4px 0px;
-              color: white; box-shadow: none; width: 76px;"
-              @click="confirmedNickName = true"
-              color="#9e74d0"
-              height="40"
-              :disabled="nickName === ''"
-            >
-              Confirm
-            </v-btn>
+            <v-form class="d-flex" @submit.prevent="confirmedNickName = true">
+              <v-text-field
+                class="mr-0"
+                style="border-radius: 4px 0px 0px 4px;margin-bottom:-25px"
+                outlined
+                dense
+                v-model="nickName"
+                label="Nickname"
+              />
+              <v-btn
+                class="ma-0"
+                style="border-radius: 0px 4px 4px 0px;
+                color: white; box-shadow: none; width: 76px;"
+                @click="confirmedNickName = true"
+                color="#9e74d0"
+                height="40"
+                :disabled="nickName === ''"
+              >
+                Confirm
+              </v-btn>
+            </v-form>
           </div>
         </transition>
 
@@ -195,11 +229,11 @@
               Number of Seats: {{ dialogFlight.seats }}
             </div>
             <div class="dialog-text">
-              Origin {{ dialogFlight.origin[0] }}Lat
+              Origin: {{ dialogFlight.origin[0] }}Lat
               , {{dialogFlight.origin[1]}}Lon
             </div>
             <div class="dialog-text">
-              Destination {{ dialogFlight.destination[0] }}Lat
+              Destination: {{ dialogFlight.destination[0] }}Lat
               , {{dialogFlight.destination[1]}}Lon
             </div>
             <v-row class="mx-0 mb-5 mt-3 dialog-text">
@@ -248,7 +282,10 @@ export default {
     nickName: '',
     confirmedNickName: false,
     message: '',
-    messages: [],
+    messages: [{ name: 'dinko', message: 'hola', date: 1621122294205},
+    { name: 'perro', message: 'hola', date: 1621122294205 },
+    { name: 'dinko', message: 'hola', date: 1621122294205},
+    { name: 'perro', message: 'hola', date: 1621122294205 }],
   }),
   computed: {
     carouselNumberArray() {
@@ -271,6 +308,13 @@ export default {
       });
       return selectedFlight;
     },
+  },
+  filters: {
+    dateFilter(number) {
+      const date = new Date(number);
+      return `${date.getHours()}:${date.getMinutes()}  ${
+      date.getDate()}/${date.getMonth() + 1}/${date.getFullYear()}`;
+    }
   },
   mounted() {
     this.mapVisible = true;
@@ -374,13 +418,25 @@ export default {
       });
     },
     getMessage(message) {
-      console.log(message);
+      this.messages.push(message);
+      const element = document.getElementById('chatWindow');
+      element.scrollTo({
+        top: element.scrollHeight,
+        behavior: 'smooth',
+        
+      });
     },
     openFlight(code) {
       this.dialogCode = code;
       this.dialogVisible = true;
     },
     sendMessage() {
+      const element = document.getElementById('chatWindow');
+      element.scrollTo({
+        top: element.scrollHeight,
+        behavior: 'smooth',
+        
+      });
       this.socket.emit('CHAT', {
         name: this.nickName,
         message: this.message,
