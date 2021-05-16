@@ -290,10 +290,7 @@ export default {
     nickName: '',
     confirmedNickName: false,
     message: '',
-    messages: [{ name: 'dinko', message: 'hola', date: 1621122294205},
-    { name: 'perro', message: 'hola', date: 1621122294205 },
-    { name: 'dinko', message: 'hola', date: 1621122294205},
-    { name: 'perro', message: 'hola', date: 1621122294205 }],
+    messages: [],
   }),
   computed: {
     carouselNumberArray() {
