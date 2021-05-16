@@ -333,7 +333,7 @@ export default {
       }
     },
     chat(value) {
-      if (value) {
+      if (value && this.confirmedNickName) {
         setTimeout(() => {
           const element = document.getElementById('chatWindow');
             element.scrollTo({
@@ -441,7 +441,7 @@ export default {
         }
         this.airplanes[flight.code] = new mapboxgl.Marker({ element: el, rotation: -angleDegrees + 90 })
           .setLngLat([0, -80])
-          .setPopup(new mapboxgl.Popup({ closeButton: false })
+          .setPopup(new mapboxgl.Popup({ closeButton: false, closeOnClick: false })
           .setHTML(`<h3>#${flight.code}</h3>`)
           .setMaxWidth("300px"))
           .addTo(this.map);
@@ -451,9 +451,8 @@ export default {
         el.addEventListener('mouseout', () => {
           this.airplanes[flight.code].togglePopup();
         });
-        el.addEventListener('click', (event) => {
-          console.log(event);
-          event.preventDefault();
+        el.addEventListener('click', () => {
+          this.airplanes[flight.code].togglePopup();
         })
       });
     },
