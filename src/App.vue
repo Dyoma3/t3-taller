@@ -35,7 +35,7 @@
           color="#6c4a94"
           style="color:white; animation: bounceInLeft;animation-duration: 1s;
           height:50px; width:130px; font-size:22px; text-transform: none;
-          position: fixed; bottom: 30px; right: 50px;"
+          position: fixed; bottom: 30px; right: 50px; z-index: 2"
           rounded
           @click="chat = !chat"
         >
@@ -210,8 +210,16 @@
           <div
             v-if="dialogCode"
             class="d-flex align-center flex-column pt-3"
-            style="background-color:#6c4a94; width: 540px;"
+            style="background-color:#6c4a94; width: 540px; position: relative"
           >
+            <v-icon
+              style="position: absolute; top: 10px; right: 10px;pointer:cursor"
+              color="white"
+              size="30"
+              @click="dialogVisible = false"
+            >
+              mdi-close
+            </v-icon>
             <div
               class="d-flex align-center justify-center"
               style="height: 40px; background-color: #6c4a94; font-size: 20px;
@@ -314,6 +322,19 @@ export default {
       const date = new Date(number);
       return `${date.getHours()}:${date.getMinutes()}  ${
       date.getDate()}/${date.getMonth() + 1}/${date.getFullYear()}`;
+    }
+  },
+  watch: {
+    confirmedNickName(value) {
+      setTimeout(() => {
+        if (value !== '') {
+          const element = document.getElementById('chatWindow');
+            element.scrollTo({
+            top: element.scrollHeight,
+            behavior: 'smooth',   
+          });
+        }
+      }, 100);
     }
   },
   mounted() {
@@ -423,7 +444,6 @@ export default {
       element.scrollTo({
         top: element.scrollHeight,
         behavior: 'smooth',
-        
       });
     },
     openFlight(code) {
@@ -435,7 +455,6 @@ export default {
       element.scrollTo({
         top: element.scrollHeight,
         behavior: 'smooth',
-        
       });
       this.socket.emit('CHAT', {
         name: this.nickName,
