@@ -333,7 +333,7 @@ export default {
       }
     },
     chat(value) {
-      if (value) {
+      if (value && this.confirmedNickName) {
         setTimeout(() => {
           const element = document.getElementById('chatWindow');
             element.scrollTo({
@@ -388,7 +388,15 @@ export default {
       this.airplanes[message.code].setLngLat(
         [message.position[1], message.position[0]]
       );
-
+      const trace = this.map.getSource(`${message.code}Trace`)._data.geometry.coordinates;
+      this.map.getSource(`${message.code}Trace`).setData({
+        type: 'Feature',
+        properties: {},
+        geometry: {
+          type: 'LineString',
+          coordinates: [...trace, [message.position[1], message.position[0]]],
+        },
+      });
     },
     getFlights(message) {
       this.flights = message;
@@ -441,7 +449,7 @@ export default {
         }
         this.airplanes[flight.code] = new mapboxgl.Marker({ element: el, rotation: -angleDegrees + 90 })
           .setLngLat([0, -80])
-          .setPopup(new mapboxgl.Popup({ closeButton: false })
+          .setPopup(new mapboxgl.Popup({ closeButton: false, closeOnClick: false })
           .setHTML(`<h3>#${flight.code}</h3>`)
           .setMaxWidth("300px"))
           .addTo(this.map);
@@ -451,19 +459,43 @@ export default {
         el.addEventListener('mouseout', () => {
           this.airplanes[flight.code].togglePopup();
         });
-        el.addEventListener('click', (event) => {
-          console.log(event);
-          event.preventDefault();
-        })
+        el.addEventListener('click', () => {
+          this.airplanes[flight.code].togglePopup();
+        });
+        // tracing line
+        this.map.addSource(`${flight.code}Trace`, {
+          type: 'geojson',
+          data: {
+            type: 'Feature',
+            properties: {},
+            geometry: {
+              type: 'LineString',
+              coordinates: [],
+            },
+          },
+        });
+        this.map.addLayer({
+          'id': `${flight.code}Trace`,
+          'type': 'line',
+          'source': `${flight.code}Trace`,
+          'paint': {
+            'line-color': 'yellow',
+            'line-opacity': 0.75,
+            'line-width': 5,
+          },
+        });
+        
       });
     },
     getMessage(message) {
       this.messages.push(message);
       const element = document.getElementById('chatWindow');
-      element.scrollTo({
-        top: element.scrollHeight,
-        behavior: 'smooth',
-      });
+      if (this.chat && this.confirmedNickName) {
+        element.scrollTo({
+          top: element.scrollHeight,
+          behavior: 'smooth',
+        });
+      }
     },
     openFlight(code) {
       this.dialogCode = code;
