@@ -187,7 +187,7 @@
                         class="d-flex align-center justify-center card-hover"
                         @click="openFlight(flights[carouselNumber * 3 + n].code)"
                       >
-                        Ver más
+                        See more
                       </div>
                     </div>
                   </v-hover>
