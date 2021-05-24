@@ -484,7 +484,37 @@ export default {
             'line-width': 5,
           },
         });
-        
+        this.map.addSource(`${flight.code}RoutePoints`, {
+          type: 'geojson',
+          data: {
+            "type": "FeatureCollection",
+            "features": [
+              {
+                "type": "Feature",
+                "geometry": {
+                  "type": "Point",
+                  "coordinates": [flight.origin[1], flight.origin[0]],
+                },
+              },
+              {
+                "type": "Feature",
+                "geometry": {
+                  "type": "Point",
+                  "coordinates": [flight.destination[1], flight.destination[0]],
+                },
+              },
+            ]
+          },
+        });
+        this.map.addLayer({
+          'id':`${flight.code}RoutePoints`,
+          'type': 'circle',
+          'source': `${flight.code}RoutePoints`,
+          'paint': {
+            'circle-radius': 5,
+            'circle-color': 'green'
+          },
+        });
       });
     },
     getMessage(message) {
